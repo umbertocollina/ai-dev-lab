@@ -1,0 +1,80 @@
+# Requirements Specification Template
+
+project:
+  name: <PROJECT_NAME>
+  version: 1.0.0
+  description: <PROJECT_DESCRIPTION>
+  stakeholders:
+    - name: <STAKEHOLDER_NAME>
+      role: <ROLE>
+      contact: <EMAIL>
+
+context:
+  business_domain: <DOMAIN>
+  target_users: <USER_DESCRIPTION>
+  problem_statement: |
+    <DESCRIBE THE PROBLEM THIS PROJECT SOLVES>
+
+functional_requirements:
+  - id: REQ-F-001
+    title: <REQUIREMENT_TITLE>
+    description: |
+      <DETAILED_DESCRIPTION>
+    acceptance_criteria:
+      - <CRITERION_1>
+      - <CRITERION_2>
+    priority: high|medium|low
+    stakeholder: <STAKEHOLDER>
+    estimated_effort: small|medium|large
+    dependencies: []
+    tags:
+      - <TAG>
+
+non_functional_requirements:
+  performance:
+    - id: REQ-NF-P-001
+      description: <PERFORMANCE_REQUIREMENT>
+      metric: <MEASUREMENT>
+      target: <TARGET_VALUE>
+      priority: high|medium|low
+  
+  security:
+    - id: REQ-NF-S-001
+      description: <SECURITY_REQUIREMENT>
+      standard: <STANDARD_REFERENCE>
+      priority: critical|high|medium|low
+  
+  scalability:
+    - id: REQ-NF-SC-001
+      description: <SCALABILITY_REQUIREMENT>
+      target: <TARGET>
+      priority: high|medium|low
+  
+  reliability:
+    - id: REQ-NF-R-001
+      description: <RELIABILITY_REQUIREMENT>
+      target: <SLA_TARGET>
+      priority: high|medium|low
+
+constraints:
+  technical:
+    - <CONSTRAINT_DESCRIPTION>
+  business:
+    - <CONSTRAINT_DESCRIPTION>
+  regulatory:
+    - <CONSTRAINT_DESCRIPTION>
+
+assumptions:
+  - <ASSUMPTION>
+
+risks:
+  - id: RISK-001
+    description: <RISK_DESCRIPTION>
+    probability: high|medium|low
+    impact: high|medium|low
+    mitigation: <MITIGATION_STRATEGY>
+
+success_metrics:
+  - metric: <METRIC_NAME>
+    target: <TARGET_VALUE>
+    measurement: <HOW_TO_MEASURE>
