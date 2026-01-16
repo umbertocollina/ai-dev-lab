@@ -1,0 +1,139 @@
+# Simple Feature Development Workflow Example
+
+name: Simple Feature Workflow
+version: 1.0.0
+description: |
+  A basic workflow for developing a new feature from requirements to deployment.
+  This workflow demonstrates sequential agent execution.
+
+# Global configuration
+config:
+  timeout: 3600  # 1 hour
+  retry:
+    max_attempts: 3
+    backoff: exponential
+
+# Workflow steps
+steps:
+  # Step 1: Analyze and formalize requirements
+  - name: gather_requirements
+    agent: RequirementsAgent
+    description: Extract and formalize requirements from user input
+    input:
+      text: ${input.requirements_text}
+      context: ${input.project_context}
+      stakeholders: ${input.stakeholders}
+    output: requirements_spec
+    timeout: 300
+    
+  # Step 2: Design architecture
+  - name: design_architecture
+    agent: DesignAgent
+    description: Design software architecture based on requirements
+    input:
+      requirements: ${steps.gather_requirements.output.requirements}
+      constraints:
+        budget: ${input.budget}
+        timeline: ${input.timeline}
+      preferences:
+        cloud_provider: ${input.cloud_provider}
+    output: architecture_design
+    timeout: 600
+    
+  # Step 3: Generate implementation
+  - name: generate_implementation
+    agent: ImplementationAgent
+    description: Generate code from specifications
+    input:
+      requirements: ${steps.gather_requirements.output}
+      design: ${steps.design_architecture.output}
+      language: ${input.programming_language}
+      framework: ${input.framework}
+    output: generated_code
+    timeout: 900
+    
+  # Step 4: Generate tests
+  - name: generate_tests
+    agent: TestingAgent
+    description: Generate test suites for the implementation
+    input:
+      code: ${steps.generate_implementation.output}
+      requirements: ${steps.gather_requirements.output}
+      coverage_target: 80
+    output: test_suite
+    timeout: 600
+    
+  # Step 5: Run tests
+  - name: execute_tests
+    agent: TestingAgent
+    description: Execute generated tests
+    action: execute_tests
+    input:
+      tests: ${steps.generate_tests.output}
+      code: ${steps.generate_implementation.output}
+    output: test_results
+    timeout: 300
+    
+  # Step 6: Deploy (conditional on test success)
+  - name: deploy_to_staging
+    agent: DeploymentAgent
+    description: Deploy to staging environment
+    condition: ${steps.execute_tests.output.all_passed}
+    input:
+      code: ${steps.generate_implementation.output}
+      environment: staging
+      config: ${input.deployment_config}
+    output: deployment_info
+    timeout: 600
+
+# Output mapping
+output:
+  requirements: ${steps.gather_requirements.output}
+  architecture: ${steps.design_architecture.output}
+  code: ${steps.generate_implementation.output}
+  tests: ${steps.generate_tests.output}
+  test_results: ${steps.execute_tests.output}
+  deployment: ${steps.deploy_to_staging.output}
+
+# Error handling
+on_error:
+  - step: gather_requirements
+    action: notify
+    message: "Failed to process requirements"
+  
+  - step: execute_tests
+    action: continue  # Continue even if tests fail (for demonstration only - not recommended in production)
+  
+  - step: deploy_to_staging
+    action: rollback
+    message: "Deployment failed, rolling back"
+
+# Notifications
+notifications:
+  on_complete:
+    - type: email
+      to: ${input.notify_email}
+      subject: "Workflow completed: ${workflow.name}"
+  
+  on_error:
+    - type: email
+      to: ${input.notify_email}
+      subject: "Workflow failed: ${workflow.name}"
+
+# Example input for this workflow
+example_input:
+  requirements_text: |
+    Build a REST API for user management.
+    Users should be able to register, login, and update their profile.
+    Use JWT for authentication.
+  project_context: "Web application backend"
+  stakeholders: ["Product Owner", "Tech Lead"]
+  budget: "medium"
+  timeline: "3 months"
+  cloud_provider: "AWS"
+  programming_language: "Python"
+  framework: "FastAPI"
+  deployment_config:
+    region: "us-east-1"
+    instance_type: "t3.medium"
+  notify_email: "team@example.com"
