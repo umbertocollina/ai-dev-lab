@@ -1,102 +1,167 @@
 # AI Development Lab 🤖🔬
 
-Un laboratorio completo per sfruttare le potenzialità dell'Intelligenza Artificiale nello sviluppo software, con focus su architettura guidata da agenti e spec-driven development.
+Un laboratorio completo per sfruttare le potenzialità dell'Intelligenza Artificiale nello sviluppo software .NET, con focus su BDD/TDD, Clean Architecture e spec-driven development.
 
 ## 🎯 Obiettivi
 
-Questo repository è progettato per aiutare software architects e sviluppatori a:
+Questo repository è progettato per aiutare software architects e sviluppatori .NET a:
 
+- **Sviluppare con BDD/TDD**: Utilizzare Reqnroll (Gherkin) e xUnit per test-driven development
+- **Implementare Clean Architecture**: Strutture applicative seguendo i principi SOLID e DDD
 - **Sfruttare l'AI in ogni fase dello sviluppo**: Dalla raccolta requisiti al deployment
 - **Implementare agenti specializzati**: Per automatizzare e migliorare il processo di sviluppo
 - **Adottare lo Spec-Driven Development**: Approccio metodologico basato su specifiche formali
 - **Gestire task complessi**: Con orchestrazione intelligente di agenti AI
+
+## 🔷 Focus su .NET
+
+Questo repository è specializzato nello sviluppo **.NET** con:
+- **Reqnroll** per BDD testing con feature file Gherkin
+- **xUnit/NUnit** per TDD e unit testing
+- **Clean Architecture** con separazione dei layer (Domain, Application, Infrastructure, Presentation)
+- **CQRS** con MediatR
+- **Domain-Driven Design** patterns
 
 ## 📚 Struttura del Repository
 
 ```
 ai-dev-lab/
 ├── docs/                          # Documentazione completa
+│   ├── dotnet-development/        # 🔷 .NET con BDD/TDD e Clean Architecture
 │   ├── spec-driven-development/   # Guide sullo spec-driven development
 │   ├── ai-architecture/           # Pattern architetturali con AI
 │   └── best-practices/            # Best practices e linee guida
 ├── agents/                        # Framework e implementazioni di agenti
 │   ├── requirements/              # Agenti per raccolta requisiti
 │   ├── design/                    # Agenti per design architetturale
-│   ├── implementation/            # Agenti per implementazione
-│   ├── testing/                   # Agenti per testing
+│   ├── implementation/            # Agenti per implementazione (con focus .NET)
+│   ├── testing/                   # Agenti per testing (BDD con Reqnroll)
 │   └── deployment/                # Agenti per deployment
 ├── specs/                         # Template e esempi di specifiche
 │   ├── templates/                 # Template riutilizzabili
-│   └── examples/                  # Esempi pratici
+│   └── examples/                  # Esempi pratici (inclusi .feature Gherkin)
 ├── workflows/                     # Workflow di orchestrazione
 │   └── examples/                  # Esempi di workflow completi
 └── examples/                      # Progetti esempio end-to-end
+    └── dotnet-clean-architecture/ # 🔷 Esempio completo .NET con Clean Architecture
 ```
 
 ## 🚀 Quick Start
 
-### 1. Comprendi lo Spec-Driven Development
+### 1. Inizia con .NET BDD/TDD e Clean Architecture
 
-Lo **Spec-Driven Development** (SDD) è un approccio metodologico che pone le specifiche formali al centro del processo di sviluppo. Leggi la [guida completa](docs/spec-driven-development/README.md) per approfondire.
+Questa è la **priorità principale** del repository. Leggi la [guida completa .NET](docs/dotnet-development/README.md) per:
+- Configurare Reqnroll per BDD testing
+- Scrivere feature file in Gherkin
+- Implementare Clean Architecture
+- Applicare pattern TDD
+- Usare CQRS con MediatR
 
-### 2. Esplora gli Agenti
+**Esempio pratico**: [Sistema di Gestione Ordini](examples/dotnet-clean-architecture/README.md) - Implementazione completa con BDD, TDD e Clean Architecture.
 
-Gli agenti AI sono componenti specializzati che supportano diverse fasi dello sviluppo:
+### 2. Comprendi lo Spec-Driven Development
 
-- **Requirements Agent**: Analizza e formalizza i requisiti
-- **Architecture Agent**: Progetta soluzioni architetturali
-- **Implementation Agent**: Genera codice basato su specifiche
-- **Testing Agent**: Crea e esegue test
-- **Deployment Agent**: Gestisce il rilascio
+Lo **Spec-Driven Development** (SDD) è un approccio metodologico che pone le specifiche formali al centro del processo di sviluppo. Perfettamente integrato con BDD. Leggi la [guida completa](docs/spec-driven-development/README.md) per approfondire.
+
+### 3. Esplora gli Agenti AI
+
+Gli agenti AI sono componenti specializzati che supportano diverse fasi dello sviluppo .NET:
+
+- **Requirements Agent**: Analizza e formalizza i requisiti → Feature file Gherkin
+- **Architecture Agent**: Progetta Clean Architecture per .NET
+- **Implementation Agent**: Genera codice C# basato su specifiche
+- **Testing Agent**: Crea test Reqnroll e xUnit
+- **Deployment Agent**: Gestisce il rilascio di applicazioni .NET
 
 Vedi la [documentazione degli agenti](agents/README.md) per dettagli.
 
-### 3. Utilizza i Workflow
+### 4. Utilizza i Workflow
 
-I workflow orchestrano gli agenti per completare task complessi. Esplora gli [esempi di workflow](workflows/README.md).
+I workflow orchestrano gli agenti per completare task complessi .NET. Esplora gli [esempi di workflow](workflows/README.md).
 
 ## 📖 Documentazione
 
 ### Concetti Chiave
 
-1. **[Spec-Driven Development](docs/spec-driven-development/README.md)**
+1. **[.NET Development con BDD/TDD](docs/dotnet-development/README.md)** 🔷 **PRIORITÀ**
+   - Reqnroll e Gherkin per BDD
+   - xUnit per TDD e unit testing
+   - Clean Architecture in .NET
+   - CQRS con MediatR
+   - Domain-Driven Design
+
+2. **[Spec-Driven Development](docs/spec-driven-development/README.md)**
    - Cos'è e perché utilizzarlo
    - Come scrivere specifiche efficaci
+   - Integrazione con BDD/Gherkin
    - Tool e metodologie
 
-2. **[AI-Powered Architecture](docs/ai-architecture/README.md)**
+3. **[AI-Powered Architecture](docs/ai-architecture/README.md)**
    - Pattern architetturali con AI
    - Design patterns per agenti
+   - Clean Architecture con AI
    - Scalabilità e performance
 
-3. **[Agent Framework](agents/README.md)**
+4. **[Agent Framework](agents/README.md)**
    - Architettura degli agenti
    - Comunicazione tra agenti
+   - Agenti specializzati per .NET
    - Estensibilità
 
-4. **[Task Orchestration](workflows/README.md)**
+5. **[Task Orchestration](workflows/README.md)**
    - Gestione delle dipendenze
    - Coordinamento degli agenti
+   - Workflow per progetti .NET
    - Error handling e retry
 
 ## 🛠️ Utilizzo Pratico
 
-### Esempio: Sviluppo di una Feature
+### Esempio: Sviluppo di una Feature con BDD/TDD (.NET)
 
 ```bash
-# 1. Definisci la specifica
-cat > specs/my-feature.yaml << EOF
-feature: User Authentication
-requirements:
-  - secure login
-  - JWT tokens
-  - password reset
-agents:
-  - requirements
-  - design
-  - implementation
-  - testing
+# 1. Definisci la feature in Gherkin
+cat > Features/UserRegistration.feature << 'EOF'
+Feature: User Registration
+    Scenario: Register new user
+        When I register with email "user@example.com"
+        Then the registration should succeed
 EOF
+
+# 2. Esegui test (RED - fallisce perché non c'è implementazione)
+dotnet test
+
+# 3. Implementa step definitions
+# StepDefinitions/UserRegistrationSteps.cs
+
+# 4. Implementa handler con TDD
+# Application/Features/Auth/Commands/RegisterUserCommand.cs
+
+# 5. Esegui test (GREEN - passa)
+dotnet test
+
+# 6. Refactoring
+# Migliora codice mantenendo i test verdi
+```
+
+### Workflow Completo
+
+```yaml
+# specs/dotnet-feature.yaml
+feature: User Authentication
+technology:
+  framework: .NET 8.0
+  testing: Reqnroll + xUnit
+  architecture: Clean Architecture
+requirements:
+  - secure registration with email/password
+  - login with JWT tokens
+  - password reset functionality
+agents:
+  - requirements   # Genera feature file Gherkin
+  - design         # Progetta Clean Architecture
+  - implementation # Genera codice C# con CQRS
+  - testing        # Genera step definitions e unit tests
+```
 
 # 2. Esegui il workflow
 ./workflows/feature-development.sh specs/my-feature.yaml
