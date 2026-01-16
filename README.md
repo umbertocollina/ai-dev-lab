@@ -6,7 +6,7 @@ Un laboratorio completo per sfruttare le potenzialità dell'Intelligenza Artific
 
 Questo repository è progettato per aiutare software architects e sviluppatori .NET a:
 
-- **Sviluppare con BDD/TDD**: Utilizzare Reqnroll (Gherkin) e xUnit per test-driven development
+- **Sviluppare con BDD/TDD**: Utilizzare Reqnroll (Gherkin) e NUnit per test-driven development
 - **Implementare Clean Architecture**: Strutture applicative seguendo i principi SOLID e DDD
 - **Sfruttare l'AI in ogni fase dello sviluppo**: Dalla raccolta requisiti al deployment
 - **Implementare agenti specializzati**: Per automatizzare e migliorare il processo di sviluppo
@@ -17,7 +17,7 @@ Questo repository è progettato per aiutare software architects e sviluppatori .
 
 Questo repository è specializzato nello sviluppo **.NET** con:
 - **Reqnroll** per BDD testing con feature file Gherkin
-- **xUnit/NUnit** per TDD e unit testing
+- **NUnit** per unit testing (anche con Reqnroll per consistenza)
 - **Clean Architecture** con separazione dei layer (Domain, Application, Infrastructure, Presentation)
 - **CQRS** con MediatR
 - **Domain-Driven Design** patterns
@@ -53,6 +53,7 @@ ai-dev-lab/
 Questa è la **priorità principale** del repository. Leggi la [guida completa .NET](docs/dotnet-development/README.md) per:
 - Configurare Reqnroll per BDD testing
 - Scrivere feature file in Gherkin
+- Usare NUnit per unit testing (anche con Reqnroll)
 - Implementare Clean Architecture
 - Applicare pattern TDD
 - Usare CQRS con MediatR
@@ -70,7 +71,7 @@ Gli agenti AI sono componenti specializzati che supportano diverse fasi dello sv
 - **Requirements Agent**: Analizza e formalizza i requisiti → Feature file Gherkin
 - **Architecture Agent**: Progetta Clean Architecture per .NET
 - **Implementation Agent**: Genera codice C# basato su specifiche
-- **Testing Agent**: Crea test Reqnroll e xUnit
+- **Testing Agent**: Crea test Reqnroll con NUnit
 - **Deployment Agent**: Gestisce il rilascio di applicazioni .NET
 
 Vedi la [documentazione degli agenti](agents/README.md) per dettagli.
@@ -85,7 +86,7 @@ I workflow orchestrano gli agenti per completare task complessi .NET. Esplora gl
 
 1. **[.NET Development con BDD/TDD](docs/dotnet-development/README.md)** 🔷 **PRIORITÀ**
    - Reqnroll e Gherkin per BDD
-   - xUnit per TDD e unit testing
+   - NUnit per TDD e unit testing (anche con Reqnroll)
    - Clean Architecture in .NET
    - CQRS con MediatR
    - Domain-Driven Design
@@ -150,7 +151,7 @@ dotnet test
 feature: User Authentication
 technology:
   framework: .NET 8.0
-  testing: Reqnroll + xUnit
+  testing: Reqnroll + NUnit
   architecture: Clean Architecture
 requirements:
   - secure registration with email/password
@@ -160,7 +161,7 @@ agents:
   - requirements   # Genera feature file Gherkin
   - design         # Progetta Clean Architecture
   - implementation # Genera codice C# con CQRS
-  - testing        # Genera step definitions e unit tests
+  - testing        # Genera step definitions e unit tests con NUnit
 ```
 
 # 2. Esegui il workflow

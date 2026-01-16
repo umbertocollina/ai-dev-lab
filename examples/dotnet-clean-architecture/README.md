@@ -20,7 +20,7 @@ Esempio completo di applicazione .NET che implementa Clean Architecture con BDD 
 - Entity Framework Core
 - SQL Server / PostgreSQL
 - Reqnroll (BDD)
-- xUnit (TDD)
+- NUnit (unit testing con Reqnroll)
 - MediatR (CQRS)
 - FluentValidation
 - AutoMapper
@@ -190,6 +190,7 @@ Feature: Order Management
 ```csharp
 // StepDefinitions/OrderManagementSteps.cs
 using Reqnroll;
+using NUnit.Framework;
 using FluentAssertions;
 using OrderManagement.Application.Features.Orders.Commands;
 using OrderManagement.Application.Features.Orders.DTOs;
@@ -303,19 +304,42 @@ public class OrderManagementSteps
 ## 🔴 Unit Test Example
 
 ```csharp
-// Application.UnitTests/Features/Orders/Commands/CreateOrderCommandTests.cs
-using Xunit;
+// Application.UnitTests/Features/Orders/Commands/CreateOrderCommand.feature
+Feature: Create Order Command
+    Unit tests for creating orders
+
+    Scenario: Handle valid command should create order
+        Given a valid create order command
+        When the handler processes the command
+        Then the order should be created
+        And the order total should be calculated correctly
+
+    Scenario: Handle insufficient stock should return error
+        Given a create order command with quantity 20 for product with stock 10
+        When the handler processes the command
+        Then the result should fail
+        And the error should mention "Insufficient stock"
+```
+
+```csharp
+// Application.UnitTests/StepDefinitions/CreateOrderCommandSteps.cs
+using NUnit.Framework;
 using FluentAssertions;
 using Moq;
+using Reqnroll;
 using OrderManagement.Application.Features.Orders.Commands.CreateOrder;
 
-public class CreateOrderCommandTests
+[Binding]
+public class CreateOrderCommandSteps
 {
-    private readonly Mock<IOrderRepository> _orderRepositoryMock;
-    private readonly Mock<IProductRepository> _productRepositoryMock;
-    private readonly CreateOrderCommandHandler _handler;
+    private Mock<IOrderRepository> _orderRepositoryMock;
+    private Mock<IProductRepository> _productRepositoryMock;
+    private CreateOrderCommandHandler _handler;
+    private CreateOrderCommand _command;
+    private Result _result;
 
-    public CreateOrderCommandTests()
+    [BeforeScenario]
+    public void Setup()
     {
         _orderRepositoryMock = new Mock<IOrderRepository>();
         _productRepositoryMock = new Mock<IProductRepository>();
@@ -325,11 +349,10 @@ public class CreateOrderCommandTests
         );
     }
 
-    [Fact]
-    public async Task Handle_ValidCommand_ShouldCreateOrder()
+    [Given(@"a valid create order command")]
+    public void GivenAValidCreateOrderCommand()
     {
-        // Arrange
-        var command = new CreateOrderCommand
+        _command = new CreateOrderCommand
         {
             Items = new List<OrderItemDto>
             {
@@ -348,47 +371,57 @@ public class CreateOrderCommandTests
         _productRepositoryMock
             .Setup(x => x.GetByIdAsync(2))
             .ReturnsAsync(product2);
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeTrue();
-        result.Value.TotalAmount.Should().Be(2027m); // (999*2 + 29*1)
-        
-        _orderRepositoryMock.Verify(
-            x => x.AddAsync(It.IsAny<Order>()),
-            Times.Once
-        );
     }
 
-    [Fact]
-    public async Task Handle_InsufficientStock_ShouldReturnError()
+    [Given(@"a create order command with quantity (.*) for product with stock (.*)")]
+    public void GivenACreateOrderCommandWithQuantityForProductWithStock(int quantity, int stock)
     {
-        // Arrange
-        var command = new CreateOrderCommand
+        _command = new CreateOrderCommand
         {
             Items = new List<OrderItemDto>
             {
-                new() { ProductId = 1, Quantity = 20 }
+                new() { ProductId = 1, Quantity = quantity }
             }
         };
 
-        var product = Product.Create("Laptop", 999m, 10);
-
+        var product = Product.Create("Laptop", 999m, stock);
         _productRepositoryMock
             .Setup(x => x.GetByIdAsync(1))
             .ReturnsAsync(product);
+    }
 
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
+    [When(@"the handler processes the command")]
+    public async Task WhenTheHandlerProcessesTheCommand()
+    {
+        _result = await _handler.Handle(_command, CancellationToken.None);
+    }
 
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.Contains("Insufficient stock"));
+    [Then(@"the order should be created")]
+    public void ThenTheOrderShouldBeCreated()
+    {
+        _result.Should().NotBeNull();
+        _result.IsSuccess.Should().BeTrue();
+    }
+
+    [Then(@"the order total should be calculated correctly")]
+    public void ThenTheOrderTotalShouldBeCalculatedCorrectly()
+    {
+        _result.Value.TotalAmount.Should().Be(2027m); // (999*2 + 29*1)
+    }
+
+    [Then(@"the result should fail")]
+    public void ThenTheResultShouldFail()
+    {
+        _result.IsSuccess.Should().BeFalse();
+    }
+
+    [Then(@"the error should mention ""(.*)""")]
+    public void ThenTheErrorShouldMention(string errorText)
+    {
+        _result.Errors.Should().Contain(e => e.Contains(errorText));
     }
 }
+```
 ```
 
 ## 🏛️ Domain Entity Example
@@ -533,7 +566,7 @@ dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
 
 1. **Clean Architecture**: Separazione chiara dei layer (Domain, Application, Infrastructure, Presentation)
 2. **BDD con Reqnroll**: Feature file in Gherkin con step definitions complete
-3. **TDD con xUnit**: Unit test con pattern AAA (Arrange-Act-Assert)
+3. **TDD con Reqnroll e NUnit**: Unit test con feature file Gherkin per consistenza
 4. **CQRS**: Separazione comandi e query con MediatR
 5. **Domain-Driven Design**: Rich domain model con business logic nel Domain
 6. **Repository Pattern**: Astrazione dell'accesso ai dati

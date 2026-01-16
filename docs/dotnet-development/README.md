@@ -4,7 +4,7 @@
 
 Questo repository è specializzato nello sviluppo .NET utilizzando:
 - **BDD (Behavior-Driven Development)** con Reqnroll e Gherkin
-- **TDD (Test-Driven Development)** con xUnit/NUnit
+- **TDD (Test-Driven Development)** con Reqnroll e NUnit
 - **Clean Architecture** per struttura e design
 - **AI Agents** per automatizzare il processo di sviluppo
 
@@ -13,7 +13,7 @@ Questo repository è specializzato nello sviluppo .NET utilizzando:
 ### Framework e Librerie
 - **.NET 8.0+** - Framework principale
 - **Reqnroll** - BDD testing framework (SpecFlow next-gen)
-- **xUnit / NUnit** - Unit testing
+- **NUnit** - Unit testing con Reqnroll
 - **FluentAssertions** - Assertion library
 - **Moq / NSubstitute** - Mocking framework
 - **MediatR** - CQRS pattern implementation
@@ -66,17 +66,17 @@ Solution/
 │       └── Program.cs
 │
 └── tests/
-    ├── Domain.UnitTests/            # Unit tests per Domain
-    ├── Application.UnitTests/       # Unit tests per Application
-    ├── Application.IntegrationTests/ # Integration tests
-    └── Application.AcceptanceTests/ # BDD tests con Reqnroll
+    ├── Domain.UnitTests/            # Unit tests con Reqnroll/NUnit
+    ├── Application.UnitTests/       # Unit tests con Reqnroll/NUnit
+    ├── Application.IntegrationTests/ # Integration tests con Reqnroll/NUnit
+    └── Application.AcceptanceTests/ # BDD tests con Reqnroll/NUnit
         ├── Features/                # File .feature (Gherkin)
         ├── StepDefinitions/         # Step definitions
         ├── Hooks/                   # Before/After hooks
         └── Support/                 # Helper e utilities
 ```
 
-## 🧪 BDD con Reqnroll
+## 🧪 BDD con Reqnroll e NUnit
 
 ### Installazione
 
@@ -90,14 +90,18 @@ dotnet new classlib -n MyProject.Application
 dotnet new classlib -n MyProject.Infrastructure
 dotnet new webapi -n MyProject.WebApi
 
-# Create test projects
-dotnet new xunit -n MyProject.Application.UnitTests
-dotnet new xunit -n MyProject.Application.AcceptanceTests
+# Create test projects with NUnit
+dotnet new nunit -n MyProject.Application.UnitTests
+dotnet new nunit -n MyProject.Application.AcceptanceTests
 
-# Add Reqnroll to acceptance tests
-cd MyProject.Application.AcceptanceTests
+# Add Reqnroll to all test projects
+cd MyProject.Application.UnitTests
 dotnet add package Reqnroll
-dotnet add package Reqnroll.xUnit
+dotnet add package Reqnroll.NUnit
+
+cd ../MyProject.Application.AcceptanceTests
+dotnet add package Reqnroll
+dotnet add package Reqnroll.NUnit
 dotnet add package FluentAssertions
 ```
 
@@ -264,24 +268,57 @@ public class TestHooks
 }
 ```
 
-## 🔴 TDD con xUnit
+## 🔴 TDD con Reqnroll e NUnit
+
+Anche i test unitari utilizzano Reqnroll con NUnit per mantenere la consistenza e sfruttare le potenzialità di Gherkin.
 
 ### Test Structure
 
 ```csharp
-// Application.UnitTests/Features/Auth/Commands/RegisterUserCommandTests.cs
-using Xunit;
+// Application.UnitTests/Features/Auth/Commands/RegisterUserCommand.feature
+Feature: Register User Command
+    Unit tests for user registration command handler
+
+    Scenario: Handle valid command should create user
+        Given a valid registration command
+        When the handler processes the command
+        Then the user should be created
+        And the user should be stored in repository
+
+    Scenario Outline: Handle invalid email should return validation error
+        Given a registration command with email "<email>"
+        When the handler processes the command
+        Then the validation should fail
+        And the error should mention "email"
+
+        Examples:
+            | email         |
+            |               |
+            | invalid-email |
+            | test          |
+```
+
+### Step Definitions per Unit Test
+
+```csharp
+// Application.UnitTests/StepDefinitions/RegisterUserCommandSteps.cs
+using NUnit.Framework;
 using FluentAssertions;
 using Moq;
+using Reqnroll;
 using MyProject.Application.Features.Auth.Commands;
 
-public class RegisterUserCommandTests
+[Binding]
+public class RegisterUserCommandSteps
 {
-    private readonly Mock<IUserRepository> _userRepositoryMock;
-    private readonly Mock<IPasswordHasher> _passwordHasherMock;
-    private readonly RegisterUserCommandHandler _handler;
+    private Mock<IUserRepository> _userRepositoryMock;
+    private Mock<IPasswordHasher> _passwordHasherMock;
+    private RegisterUserCommandHandler _handler;
+    private RegisterUserCommand _command;
+    private Result _result;
 
-    public RegisterUserCommandTests()
+    [BeforeScenario]
+    public void Setup()
     {
         _userRepositoryMock = new Mock<IUserRepository>();
         _passwordHasherMock = new Mock<IPasswordHasher>();
@@ -291,11 +328,10 @@ public class RegisterUserCommandTests
         );
     }
 
-    [Fact]
-    public async Task Handle_ValidCommand_ShouldCreateUser()
+    [Given(@"a valid registration command")]
+    public void GivenAValidRegistrationCommand()
     {
-        // Arrange
-        var command = new RegisterUserCommand
+        _command = new RegisterUserCommand
         {
             Email = "test@example.com",
             Password = "SecurePass123!",
@@ -303,69 +339,119 @@ public class RegisterUserCommandTests
         };
 
         _passwordHasherMock
-            .Setup(x => x.HashPassword(command.Password))
+            .Setup(x => x.HashPassword(_command.Password))
             .Returns("hashed_password");
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeTrue();
-        _userRepositoryMock.Verify(
-            x => x.AddAsync(It.Is<User>(u => 
-                u.Email == command.Email &&
-                u.Name == command.Name
-            )),
-            Times.Once
-        );
     }
 
-    [Theory]
-    [InlineData("")]
-    [InlineData("invalid-email")]
-    [InlineData("test")]
-    public async Task Handle_InvalidEmail_ShouldReturnValidationError(string email)
+    [Given(@"a registration command with email ""(.*)""")]
+    public void GivenARegistrationCommandWithEmail(string email)
     {
-        // Arrange
-        var command = new RegisterUserCommand
+        _command = new RegisterUserCommand
         {
             Email = email,
             Password = "SecurePass123!",
             Name = "Test User"
         };
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.Contains("email"));
     }
 
-    [Fact]
-    public async Task Handle_ExistingEmail_ShouldReturnConflictError()
+    [When(@"the handler processes the command")]
+    public async Task WhenTheHandlerProcessesTheCommand()
+    {
+        _result = await _handler.Handle(_command, CancellationToken.None);
+    }
+
+    [Then(@"the user should be created")]
+    public void ThenTheUserShouldBeCreated()
+    {
+        _result.Should().NotBeNull();
+        _result.IsSuccess.Should().BeTrue();
+    }
+
+    [Then(@"the user should be stored in repository")]
+    public void ThenTheUserShouldBeStoredInRepository()
+    {
+        _userRepositoryMock.Verify(
+            x => x.AddAsync(It.Is<User>(u => 
+                u.Email == _command.Email &&
+                u.Name == _command.Name
+            )),
+            Times.Once
+        );
+    }
+
+    [Then(@"the validation should fail")]
+    public void ThenTheValidationShouldFail()
+    {
+        _result.IsSuccess.Should().BeFalse();
+    }
+
+    [Then(@"the error should mention ""(.*)""")]
+    public void ThenTheErrorShouldMention(string errorKeyword)
+    {
+        _result.Errors.Should().Contain(e => e.Contains(errorKeyword));
+    }
+}
+```
+
+### Test con NUnit Attributes (Opzionale)
+
+Se necessario, puoi comunque usare attributi NUnit tradizionali:
+
+```csharp
+using NUnit.Framework;
+using FluentAssertions;
+using Moq;
+
+[TestFixture]
+public class RegisterUserCommandHandlerTests
+{
+    private Mock<IUserRepository> _userRepositoryMock;
+    private RegisterUserCommandHandler _handler;
+
+    [SetUp]
+    public void Setup()
+    {
+        _userRepositoryMock = new Mock<IUserRepository>();
+        _handler = new RegisterUserCommandHandler(_userRepositoryMock.Object);
+    }
+
+    [Test]
+    public async Task Handle_ValidCommand_ShouldCreateUser()
     {
         // Arrange
         var command = new RegisterUserCommand
         {
-            Email = "existing@example.com",
-            Password = "SecurePass123!",
-            Name = "Test User"
+            Email = "test@example.com",
+            Password = "SecurePass123!"
         };
 
-        _userRepositoryMock
-            .Setup(x => x.ExistsAsync(command.Email))
-            .ReturnsAsync(true);
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        _userRepositoryMock.Verify(
+            x => x.AddAsync(It.IsAny<User>()),
+            Times.Once
+        );
+    }
+
+    [TestCase("")]
+    [TestCase("invalid")]
+    [TestCase("test")]
+    public async Task Handle_InvalidEmail_ShouldFail(string email)
+    {
+        // Arrange
+        var command = new RegisterUserCommand { Email = email };
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.Contains("already exists"));
     }
 }
+```
 ```
 
 ## 🏛️ Clean Architecture Implementation
@@ -644,9 +730,9 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, R
 ## 🔗 Risorse
 
 - [Reqnroll Documentation](https://docs.reqnroll.net/)
+- [NUnit Documentation](https://docs.nunit.org/)
 - [Clean Architecture by Uncle Bob](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 - [.NET Architecture Guides](https://dotnet.microsoft.com/learn/dotnet/architecture-guides)
-- [xUnit Documentation](https://xunit.net/)
 - [FluentAssertions](https://fluentassertions.com/)
 
 ---

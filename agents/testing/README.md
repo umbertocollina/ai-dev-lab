@@ -2,17 +2,17 @@
 
 ## Panoramica
 
-Il **Testing Agent** crea e esegue test per validare l'implementazione contro le specifiche, con focus su **BDD (Reqnroll)** e **TDD (xUnit/NUnit)** per applicazioni .NET.
+Il **Testing Agent** crea e esegue test per validare l'implementazione contro le specifiche, con focus su **BDD/TDD con Reqnroll e NUnit** per applicazioni .NET.
 
 ## 🎯 Capabilities
 
 - **BDD Test Generation**: Generazione di feature file Gherkin e step definitions
-- **TDD Test Generation**: Generazione di unit test con xUnit/NUnit
+- **TDD Test Generation**: Generazione di unit test con Reqnroll e NUnit
 - **Test Execution**: Esecuzione automatica di test BDD e TDD
 - **Coverage Analysis**: Analisi di code coverage
 - **Integration Testing**: Test di integrazione per Clean Architecture
 
-## 💻 BDD Testing con Reqnroll
+## 💻 BDD Testing con Reqnroll e NUnit
 
 ### Generazione Feature File
 
@@ -59,24 +59,105 @@ public class AuthenticationSteps
 }
 ```
 
-## 🔴 TDD Testing con xUnit
+## 🔴 TDD Testing con Reqnroll e NUnit
 
-### Unit Test Generation
+Anche i test unitari utilizzano Reqnroll con NUnit per consistenza.
+
+### Unit Test Generation con Feature File
+
+```gherkin
+# Generated feature file for unit tests
+Feature: Register User Command Handler
+    Unit tests for user registration
+
+    Scenario: Valid command creates user
+        Given a valid registration command
+        When the handler processes it
+        Then a user should be created
+        And saved to repository
+```
+
+### Generated Step Definitions
 
 ```csharp
-// Generated unit test
-public class RegisterUserCommandHandlerTests
+// Generated step definition for unit test
+using NUnit.Framework;
+using FluentAssertions;
+using Moq;
+using Reqnroll;
+
+[Binding]
+public class RegisterUserCommandSteps
 {
     private readonly Mock<IUserRepository> _repositoryMock;
     private readonly RegisterUserCommandHandler _handler;
+    private Result _result;
 
-    public RegisterUserCommandHandlerTests()
+    public RegisterUserCommandSteps()
     {
         _repositoryMock = new Mock<IUserRepository>();
         _handler = new RegisterUserCommandHandler(_repositoryMock.Object);
     }
 
-    [Fact]
+    [Given(@"a valid registration command")]
+    public void GivenAValidRegistrationCommand()
+    {
+        var command = new RegisterUserCommand
+        {
+            Email = "test@example.com",
+            Password = "SecurePass123!"
+        };
+        ScenarioContext.Current["command"] = command;
+    }
+
+    [When(@"the handler processes it")]
+    public async Task WhenTheHandlerProcessesIt()
+    {
+        var command = ScenarioContext.Current["command"] as RegisterUserCommand;
+        _result = await _handler.Handle(command, CancellationToken.None);
+    }
+
+    [Then(@"a user should be created")]
+    public void ThenAUserShouldBeCreated()
+    {
+        _result.IsSuccess.Should().BeTrue();
+    }
+
+    [Then(@"saved to repository")]
+    public void ThenSavedToRepository()
+    {
+        _repositoryMock.Verify(
+            x => x.AddAsync(It.IsAny<User>()),
+            Times.Once
+        );
+    }
+}
+```
+
+### NUnit Traditional Tests (Opzionale)
+
+Se necessario, puoi usare anche attributi NUnit tradizionali:
+
+```csharp
+// Traditional NUnit test
+using NUnit.Framework;
+using FluentAssertions;
+using Moq;
+
+[TestFixture]
+public class RegisterUserCommandHandlerTests
+{
+    private Mock<IUserRepository> _repositoryMock;
+    private RegisterUserCommandHandler _handler;
+
+    [SetUp]
+    public void Setup()
+    {
+        _repositoryMock = new Mock<IUserRepository>();
+        _handler = new RegisterUserCommandHandler(_repositoryMock.Object);
+    }
+
+    [Test]
     public async Task Handle_ValidCommand_ShouldCreateUser()
     {
         // Arrange
@@ -97,9 +178,8 @@ public class RegisterUserCommandHandlerTests
         );
     }
 
-    [Theory]
-    [InlineData("")]
-    [InlineData("invalid")]
+    [TestCase("")]
+    [TestCase("invalid")]
     public async Task Handle_InvalidEmail_ShouldFail(string email)
     {
         // Arrange
