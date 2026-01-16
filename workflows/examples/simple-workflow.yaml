@@ -102,7 +102,7 @@ on_error:
     message: "Failed to process requirements"
   
   - step: execute_tests
-    action: continue  # Continue even if tests fail
+    action: continue  # Continue even if tests fail (for demonstration only - not recommended in production)
   
   - step: deploy_to_staging
     action: rollback

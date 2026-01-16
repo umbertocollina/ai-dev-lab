@@ -209,8 +209,12 @@ class WorkflowEngine:
     
     def _evaluate_condition(self, condition: str, context: Dict) -> bool:
         """Evaluate condition expression"""
-        # Simple implementation
-        # In production, use a proper expression evaluator
+        # SECURITY NOTE: This is a simplified example for demonstration purposes.
+        # In production, use a secure expression evaluator such as:
+        # - simpleeval library
+        # - RestrictedPython
+        # - Custom AST-based evaluator
+        # Never use eval() in production with untrusted input!
         return eval(condition.replace('${', 'context["').replace('}', '"]'))
     
     def _prepare_input(self, input_spec: Dict, context: Dict) -> Dict:
